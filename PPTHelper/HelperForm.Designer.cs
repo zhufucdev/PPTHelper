@@ -55,6 +55,7 @@
             this.penOptionBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.penOptionBox.TabIndex = 4;
             this.penOptionBox.TabStop = false;
+            this.penOptionBox.Click += new System.EventHandler(this.penOptionBox_Click);
             // 
             // pictureBox1
             // 

@@ -31,6 +31,28 @@ namespace PPTHelper
             }
         }
 
+        public static void DisableAcrylic(IWin32Window window)
+        {
+            if (window is null) throw new ArgumentNullException(nameof(window));
+
+            var disablePolicy = new AccentPolicy
+            {
+                AccentState = ACCENT.DISABLED
+            };
+            unsafe
+            {
+                SetWindowCompositionAttribute(
+                    new HandleRef(window, window.Handle),
+                    new WindowCompositionAttributeData
+                    {
+                        Attribute = WCA.ACCENT_POLICY,
+                        Data = &disablePolicy,
+                        DataLength = Marshal.SizeOf<AccentPolicy>()
+                    }
+                );
+            }
+        }
+
         private static uint ToAbgr(Color color)
         {
             return ((uint)color.A << 24)

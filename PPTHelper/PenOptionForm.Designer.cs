@@ -28,23 +28,38 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.colorPanel1 = new PPTHelper.ColorPanel();
             this.SuspendLayout();
+            // 
+            // colorPanel1
+            // 
+            this.colorPanel1.BackColor = System.Drawing.SystemColors.Control;
+            this.colorPanel1.CellSize = 46;
+            this.colorPanel1.ColorSelcted = System.Drawing.Color.Empty;
+            this.colorPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.colorPanel1.Location = new System.Drawing.Point(5, 5);
+            this.colorPanel1.Name = "colorPanel1";
+            this.colorPanel1.Size = new System.Drawing.Size(369, 91);
+            this.colorPanel1.TabIndex = 0;
             // 
             // PenOptionForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(550, 397);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
+            this.ClientSize = new System.Drawing.Size(379, 101);
+            this.Controls.Add(this.colorPanel1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "PenOptionForm";
+            this.Padding = new System.Windows.Forms.Padding(5);
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "PenOptionForm";
             this.TopMost = true;
+            this.Deactivate += new System.EventHandler(this.PenOptionForm_Deactivate);
             this.ResumeLayout(false);
 
         }
-
         #endregion
+
+        private ColorPanel colorPanel1;
     }
 }
