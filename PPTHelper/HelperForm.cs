@@ -25,6 +25,14 @@ namespace PPTHelper
             controller.Focus();
         }
 
+        protected override void OnHandleDestroyed(EventArgs e)
+        {
+            base.OnHandleDestroyed(e);
+
+            controller.ToolSelectionChanged -= Controller_ToolSelectionChanged;
+            controller.SlideShowChanged -= Controller_SlideShowChanged;
+        }
+
         private void Controller_SlideShowChanged(object sender, object e)
         {
             if (controller.HasText(Location, Size))

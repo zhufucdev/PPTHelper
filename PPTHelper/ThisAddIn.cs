@@ -24,10 +24,8 @@ namespace PPTHelper
         {
             view = window.View;
             this.window = window;
-            window.Application.SlideShowOnNext += (s) => SlideShowChanged.Invoke(this, s);
-            window.Application.SlideShowOnPrevious += (s) => SlideShowChanged.Invoke(this, s);
-            window.Application.SlideShowNextSlide += (s) => SlideShowChanged.Invoke(this, s);
-
+            window.Application.SlideShowOnPrevious += (s) => SlideShowChanged?.Invoke(this, s);
+            window.Application.SlideShowNextSlide += (s) => SlideShowChanged?.Invoke(this, s);
 
             var pageWidth = window.Application.ActivePresentation.PageSetup.SlideWidth;
             var pageHeight = window.Application.ActivePresentation.PageSetup.SlideHeight;
@@ -99,36 +97,29 @@ namespace PPTHelper
 
         public override bool HasText(System.Drawing.Point position, Size size)
         {
-            bool calc()
+            try
             {
-                try
+                var shapes = view.Slide.Shapes;
+                var slideHeight = view.Application.ActivePresentation.PageSetup.SlideHeight;
+                var slideWidth = view.Application.ActivePresentation.PageSetup.SlideWidth;
+                var screenSize = Screen.PrimaryScreen.Bounds;
+                foreach (PowerPoint.Shape shape in shapes)
                 {
-                    var shapes = view.Slide.Shapes;
-                    var slideHeight = view.Application.ActivePresentation.PageSetup.SlideHeight;
-                    var slideWidth = view.Application.ActivePresentation.PageSetup.SlideWidth;
-                    var screenSize = Screen.PrimaryScreen.Bounds;
-                    foreach (PowerPoint.Shape shape in shapes)
-                    {
-                        if (shape.Visible == MsoTriState.msoFalse) continue;
-                        var status = shape.TextFrame.HasText;
-                        if (status == MsoTriState.msoTrue || status == MsoTriState.msoCTrue)
-                        {
-                            var fixedLeft = shape.Left / slideWidth * screenSize.Width + SlideShowMargin.Width;
-                            var fixedTop = shape.Top / slideHeight * screenSize.Height + SlideShowMargin.Height;
-                            var shapeBound = new Rectangle((int)fixedLeft, (int)fixedTop, (int)shape.Width, (int)shape.Height);
-                            return new Rectangle(position, size).IntersectsWith(shapeBound);
-                        }
-                    }
+                    if (shape.Visible == MsoTriState.msoFalse) continue;
+                    var fixedLeft = shape.Left / slideWidth * screenSize.Width + SlideShowMargin.Width;
+                    var fixedTop = shape.Top / slideHeight * screenSize.Height + SlideShowMargin.Height;
+                    var fixedWidth = shape.Width / slideWidth * (screenSize.Width - SlideShowMargin.Width * 2);
+                    var fixedHeight = shape.Height / slideHeight * (screenSize.Height - SlideShowMargin.Height * 2);
+                    var shapeBound = new Rectangle((int)fixedLeft, (int)fixedTop, (int)fixedWidth, (int)fixedHeight);
+                    var intersect = new Rectangle(position, size).IntersectsWith(shapeBound);
+                    if (intersect)
+                        return true;
                 }
-                catch (COMException)
-                {
-                    Thread.Sleep(300);
-                    return calc();
-                }
-                return false;
             }
-            
-            return calc();
+            catch (COMException)
+            {
+            }
+            return false;
         }
     }
     public partial class ThisAddIn
