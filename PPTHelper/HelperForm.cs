@@ -8,14 +8,17 @@ namespace PPTHelper
 {
     public partial class HelperForm : Form
     {
-        private IController controller;
+        private readonly IController controller;
+        private bool pinned = false;
+        private readonly int commonTop;
         public HelperForm(IController controller)
         {
             this.controller = controller;
             InitializeComponent();
 
             var bound = Screen.PrimaryScreen.Bounds;
-            Location = new Point((bound.Width - Width) / 2, bound.Height - Height);
+            commonTop = bound.Height - Height;
+            Location = new Point((bound.Width - Width) / 2, commonTop);
             StartPosition = FormStartPosition.Manual;
             CheckForIllegalCrossThreadCalls = false;
 
@@ -33,17 +36,7 @@ namespace PPTHelper
             controller.SlideShowChanged -= Controller_SlideShowChanged;
         }
 
-        private void Controller_SlideShowChanged(object sender, object e)
-        {
-            if (controller.HasText(Location, Size))
-            {
-                AcraylicEnabled = false;
-            } 
-            else
-            {
-                AcraylicEnabled = true;
-            }
-        }
+        private void Controller_SlideShowChanged(object sender, object e) => InvalidateContextAwarePosition();
 
         private void Controller_ToolSelectionChanged(object sender, ISelection e)
         {
@@ -109,16 +102,53 @@ namespace PPTHelper
                 if (value)
                 {
                     WindowUtils.EnableAcrylic(this, blurColor);
-                    Opacity = 1f;
                     Invalidate();
                 }
                 else
                 {
                     WindowUtils.EnableAcrylic(this, Color.FromArgb(255, blurColor));
-                    Opacity = 0.7f;
                     Invalidate();
                 }
             }
+        }
+
+        private void InvalidateContextAwarePosition()
+        {
+            if (controller.HasText(Location, Size) && !pinned)
+            {
+                SlipDown();
+            }
+            else
+            {
+                SlipUp();
+            }
+        }
+        private Animator presentAnimator;
+        private void SlipDown()
+        {
+            if (Top != commonTop) return;
+            var path = new Path(Top, (int)(commonTop + Height * 0.8), 500);
+            if (presentAnimator?.CurrentStatus == AnimatorStatus.Playing)
+            {
+                if (presentAnimator.ActivePath.End == path.End) return;
+                presentAnimator.Stop();
+            }
+
+            presentAnimator = new Animator(path, FPSLimiterKnownValues.LimitSixty);
+            presentAnimator.Play(new SafeInvoker<float>((v) => Top = (int)v));
+        }
+
+        private void SlipUp()
+        {
+            if (Top == commonTop) return;
+            var path = new Path(Top, commonTop, 500);
+            if (presentAnimator?.CurrentStatus == AnimatorStatus.Playing)
+            {
+                if (presentAnimator.ActivePath.End == path.End) return;
+                presentAnimator.Stop();
+            }
+            presentAnimator = new Animator(path, FPSLimiterKnownValues.LimitSixty);
+            presentAnimator.Play(new SafeInvoker<float>((v) => Top = (int)v));
         }
 
         private Color defaultPenColor = Color.Red;
@@ -171,6 +201,39 @@ namespace PPTHelper
         private void penOptionBox_Click(object sender, EventArgs e)
         {
             ShowPenForm();
+        }
+
+        private void pinBox_Click(object sender, EventArgs e)
+        {
+            pinned = !pinned;
+            if (pinned)
+            {
+                pinBox.Image = Properties.Resources.pin_selected;
+                SlipUp();
+            }
+            else
+            {
+                pinBox.Image = Properties.Resources.pin;
+                InvalidateContextAwarePosition();
+            }
+
+            controller.Focus();
+        }
+
+        private void HelperForm_MouseEnter(object sender, EventArgs e)
+        {
+            SlipUp();
+        }
+
+        private void HelperForm_MouseLeave(object sender, EventArgs e)
+        {
+            var timer = new System.Timers.Timer()
+            {
+                AutoReset = false,
+                Interval = 2000,
+                Enabled = true
+            };
+            timer.Elapsed += (_, s) => InvalidateContextAwarePosition();
         }
     }
 }
