@@ -75,18 +75,33 @@ namespace PPTHelper
 
         private void leftBox_Click(object sender, EventArgs e)
         {
+            if (!IsUp())
+            {
+                SlipUp();
+                return;
+            }
             controller.Previous();
             controller.Focus();
         }
 
         private void rightBox_Click(object sender, EventArgs e)
         {
+            if (!IsUp())
+            {
+                SlipUp();
+                return;
+            }
             controller.Next();
             controller.Focus();
         }
 
         private void pictureBox1_Click(object sender, EventArgs e)
         {
+            if (!IsUp())
+            {
+                SlipUp();
+                return;
+            }
             controller.Exit();
         }
 
@@ -114,7 +129,9 @@ namespace PPTHelper
 
         private void InvalidateContextAwarePosition()
         {
-            if (controller.HasText(Location, Size) && !pinned)
+            var location = Location;
+            location.Y = commonTop;
+            if (controller.HasText(location, Size) && !pinned)
             {
                 SlipDown();
             }
@@ -124,9 +141,13 @@ namespace PPTHelper
             }
         }
         private Animator presentAnimator;
+        private bool IsUp()
+        {
+            return Top == commonTop;
+        }
         private void SlipDown()
         {
-            if (Top != commonTop) return;
+            if (!IsUp()) return;
             var path = new Path(Top, (int)(commonTop + Height * 0.8), 500);
             if (presentAnimator?.CurrentStatus == AnimatorStatus.Playing)
             {
@@ -140,7 +161,7 @@ namespace PPTHelper
 
         private void SlipUp()
         {
-            if (Top == commonTop) return;
+            if (IsUp()) return;
             var path = new Path(Top, commonTop, 500);
             if (presentAnimator?.CurrentStatus == AnimatorStatus.Playing)
             {
@@ -175,6 +196,11 @@ namespace PPTHelper
 
         private void penBox_Click(object sender, EventArgs e)
         {
+            if (!IsUp())
+            {
+                SlipUp();
+                return;
+            }
             if (controller.ToolSelection is PenSelection)
             {
                 ShowPenForm();
@@ -188,23 +214,43 @@ namespace PPTHelper
 
         private void cursorBox_Click(object sender, EventArgs e)
         {
+            if (!IsUp())
+            {
+                SlipUp();
+                return;
+            }
             controller.ToolSelection = new CursorSelection();
             controller.Focus();
         }
 
         private void eraserBox_Click(object sender, EventArgs e)
         {
+            if (!IsUp())
+            {
+                SlipUp();
+                return;
+            }
             controller.ToolSelection = new EraserSelection();
             controller.Focus();
         }
 
         private void penOptionBox_Click(object sender, EventArgs e)
         {
+            if (!IsUp())
+            {
+                SlipUp();
+                return;
+            }
             ShowPenForm();
         }
 
         private void pinBox_Click(object sender, EventArgs e)
         {
+            if (!IsUp())
+            {
+                SlipUp();
+                return;
+            }
             pinned = !pinned;
             if (pinned)
             {
