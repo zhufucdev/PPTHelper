@@ -30,7 +30,7 @@
     <DefineConstants>VSTO40</DefineConstants>
     <IsWebBootstrapper>False</IsWebBootstrapper>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <PublishUrl>E:\Publish\</PublishUrl>
+    <PublishUrl>D:\VSProjects\PPTHelper\Publish\</PublishUrl>
     <InstallUrl />
     <TargetCulture>zh-chs</TargetCulture>
     <ApplicationVersion>1.0.0.8</ApplicationVersion>
@@ -191,6 +191,12 @@
     <Compile Include="HelperForm.Designer.cs">
       <DependentUpon>HelperForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="HintForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="HintForm.Designer.cs">
+      <DependentUpon>HintForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="PenOptionForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -206,6 +212,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="HelperForm.resx">
       <DependentUpon>HelperForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="HintForm.resx">
+      <DependentUpon>HintForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PenOptionForm.resx">
       <DependentUpon>PenOptionForm.cs</DependentUpon>
@@ -279,6 +288,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\pin.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\baseline_error_black_36dp.png" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

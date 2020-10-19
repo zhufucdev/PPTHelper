@@ -34,6 +34,7 @@ namespace PPTHelper
 
             controller.ToolSelectionChanged -= Controller_ToolSelectionChanged;
             controller.SlideShowChanged -= Controller_SlideShowChanged;
+            hintForm?.Close();
         }
 
         private void Controller_SlideShowChanged(object sender, object e) => InvalidateContextAwarePosition();
@@ -141,6 +142,8 @@ namespace PPTHelper
             }
         }
         private Animator presentAnimator;
+        private bool isHintShown = false;
+        private HintForm hintForm;
         private bool IsUp()
         {
             return Top == commonTop;
@@ -157,6 +160,14 @@ namespace PPTHelper
 
             presentAnimator = new Animator(path, FPSLimiterKnownValues.LimitSixty);
             presentAnimator.Play(new SafeInvoker<float>((v) => Top = (int)v));
+
+            if (!isHintShown)
+            {
+                isHintShown = true;
+                hintForm = new HintForm(new Point(Location.X, (int)path.End), controller);
+                hintForm.Show();
+                hintForm.FormClosed += (s, e) => hintForm = null;
+            }
         }
 
         private void SlipUp()
@@ -170,6 +181,11 @@ namespace PPTHelper
             }
             presentAnimator = new Animator(path, FPSLimiterKnownValues.LimitSixty);
             presentAnimator.Play(new SafeInvoker<float>((v) => Top = (int)v));
+
+            if (hintForm != null)
+            {
+                hintForm.Close();
+            }
         }
 
         private Color defaultPenColor = Color.Red;
