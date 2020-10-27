@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Media;
 using System.Windows.Forms;
 using WinFormAnimation;
 
@@ -7,7 +8,6 @@ namespace PPTHelper
 {
     public partial class HintForm : Form
     {
-        private System.Timers.Timer Timer;
         private IController Controller;
         public HintForm(Point anchor, IController controller)
         {
@@ -20,31 +20,49 @@ namespace PPTHelper
             new Animator(new Path(0f, 1f, 100), FPSLimiterKnownValues.LimitSixty)
                 .Play(this, Animator.KnownProperties.Opacity);
 
-            Timer = new System.Timers.Timer()
-            {
-                Interval = 10000,
-                AutoReset = false
-            };
-            Timer.Elapsed += (s, e) =>
-            {
-                Close();
-                Dispose();
-            };
-            Timer.Enabled = true;
-
             controller.Focus();
         }
 
+        private bool drawStress = false;
         protected override void OnPaintBackground(PaintEventArgs e)
         {
             base.OnPaintBackground(e);
             var pen = new Pen(Color.Blue, 10f);
-            Point[] points = { 
-                new Point(0, 0), new Point(Width, 0),
-                new Point(Width, Height), new Point(0, Height),
-                new Point(0, 0)
-            };
-            e.Graphics.DrawLines(pen, points);
+            void draw()
+            {
+                Point[] points = {
+                    new Point(0, 0), new Point(Width, 0),
+                    new Point(Width, Height), new Point(0, Height),
+                    new Point(0, 0)
+                };
+                e.Graphics.DrawLines(pen, points);
+            }
+
+            if (drawStress)
+            {
+                var timer = new System.Timers.Timer()
+                {
+                    AutoReset = true,
+                    Interval = 500
+                };
+                var count = 0;
+                timer.Elapsed += (s, _) =>
+                {
+                    if (count >= 4)
+                    {
+                        timer.Dispose();
+                        return;
+                    }
+                    pen = new Pen(count % 2 == 0 ? Color.Blue : Color.Red, 10f);
+                    draw();
+                    count++;
+                };
+                timer.Enabled = true;
+                drawStress = false;
+            } else
+            {
+                draw();
+            }
         }
 
         private void buttonClose_Click(object sender, EventArgs e)

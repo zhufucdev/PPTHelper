@@ -105,7 +105,10 @@ namespace PPTHelper
                 var screenSize = Screen.PrimaryScreen.Bounds;
                 foreach (PowerPoint.Shape shape in shapes)
                 {
-                    if (shape.Visible == MsoTriState.msoFalse) continue;
+                    if (shape.Visible == MsoTriState.msoFalse ||
+                        (shape.HasTextFrame == MsoTriState.msoFalse
+                        && shape.HasChart == MsoTriState.msoFalse)) continue;
+
                     var fixedLeft = shape.Left / slideWidth * screenSize.Width + SlideShowMargin.Width;
                     var fixedTop = shape.Top / slideHeight * screenSize.Height + SlideShowMargin.Height;
                     var fixedWidth = shape.Width / slideWidth * (screenSize.Width - SlideShowMargin.Width * 2);
