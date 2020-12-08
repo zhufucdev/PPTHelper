@@ -61,7 +61,9 @@ namespace PPTHelper
             }
         }
 
-        private readonly Color blurColor = Color.FromArgb(31, Control.DefaultBackColor);
+        private static readonly Color defaultBlurColor = Color.FromArgb(31, Control.DefaultBackColor);
+        private static readonly Color defaultInactiveColor = Color.FromArgb(31, Color.Black);
+        private Color blurColor = defaultBlurColor;
         protected override void OnHandleCreated(EventArgs e)
         {
             base.OnHandleCreated(e);
@@ -113,7 +115,6 @@ namespace PPTHelper
             get => mArcray;
             set
             {
-                if (value == mArcray) return;
                 mArcray = value;
                 if (value)
                 {
@@ -167,13 +168,43 @@ namespace PPTHelper
                 hintForm = new HintForm(new Point(Location.X, (int)path.End), controller);
                 hintForm.Show();
                 hintForm.FormClosed += (s, e) => hintForm = null;
+                Blink();
+            } else {
+                // Change color for visibility
+                blurColor = defaultInactiveColor;
+                AcraylicEnabled = true;
             }
+        }
+
+        private void Blink()
+        {
+            var timer = new System.Timers.Timer()
+            {
+                AutoReset = true,
+                Interval = 1000
+            };
+            var count = 0;
+            timer.Elapsed += (e, s) =>
+            {
+                if (IsUp())
+                {
+                    timer.Stop();
+                    blurColor = defaultBlurColor;
+                    AcraylicEnabled = true;
+                    return;
+                }
+                blurColor = count % 2 == 0 ? Color.Red : defaultInactiveColor;
+                AcraylicEnabled = true;
+                count++;
+                if (count > 5) timer.Stop();
+            };
+            timer.Start();
         }
 
         private void SlipUp()
         {
             if (IsUp()) return;
-            var path = new Path(Top, commonTop, 500);
+            var path = new Path(Top, commonTop, 300);
             if (presentAnimator?.CurrentStatus == AnimatorStatus.Playing)
             {
                 if (presentAnimator.ActivePath.End == path.End) return;
@@ -186,6 +217,8 @@ namespace PPTHelper
             {
                 hintForm.Close();
             }
+            blurColor = defaultBlurColor;
+            AcraylicEnabled = true;
         }
 
         private Color defaultPenColor = Color.Red;
@@ -195,6 +228,8 @@ namespace PPTHelper
             {
                 penForm.Close();
                 penForm.Dispose();
+                penForm = null;
+                return;
             }
             var anchor = new Point(Location.X + penBox.Location.X, Location.Y);
             penForm = new PenOptionForm(anchor, controller);
