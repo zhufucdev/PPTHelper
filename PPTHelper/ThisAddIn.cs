@@ -44,6 +44,12 @@ namespace PPTHelper
             view.Next();
         }
 
+        public override void Switch()
+        {
+            Focus();
+            SendKeys.Send("G");
+        }
+
         public override void Previous()
         {
             view.Previous();
@@ -125,11 +131,6 @@ namespace PPTHelper
     {
         private Dictionary<PowerPoint.Presentation, HelperForm> helper = new Dictionary<PowerPoint.Presentation, HelperForm>();
 
-        private void ThisAddIn_Startup(object sender, System.EventArgs e)
-        {
-            
-        }
-
         private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
         {
         }
@@ -159,6 +160,11 @@ namespace PPTHelper
             helper[Pres].Close();
         }
 
+        protected override IRibbonExtensibility CreateRibbonExtensibilityObject()
+        {
+            return new Ribbon();
+        }
+
         #region VSTO 生成的代码
 
         /// <summary>
@@ -167,7 +173,6 @@ namespace PPTHelper
         /// </summary>
         private void InternalStartup()
         {
-            this.Startup += new System.EventHandler(ThisAddIn_Startup);
             this.Shutdown += new System.EventHandler(ThisAddIn_Shutdown);
             Application.SlideShowBegin += Application_SlideShowBegin;
             Application.SlideShowEnd += Application_SlideShowEnd;

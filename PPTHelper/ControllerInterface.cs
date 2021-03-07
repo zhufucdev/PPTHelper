@@ -12,6 +12,7 @@ namespace PPTHelper
 
         public abstract void Next();
         public abstract void Previous();
+        public abstract void Switch();
         public abstract void Exit();
 
         public abstract void Focus();

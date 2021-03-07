@@ -25,7 +25,7 @@ namespace PPTHelper
             var location = new Point(anchor.X, anchor.Y - Height);
             Location = new Point(anchor.X, (int)(anchor.Y - Height * 0.5));
             // Fade in
-            new Animator(new Path(location.Y + Height * 0.5f, location.Y, 100), FPSLimiterKnownValues.LimitSixty)
+            new Animator(new Path(location.Y + Height * 0.5f, location.Y, 100, AnimationFunctions.ExponentialEaseIn), FPSLimiterKnownValues.LimitSixty)
                 .Play(new SafeInvoker<float>((v) => Location = new Point(location.X, (int)v)));
             Opacity = 0f;
             new Animator(new Path(0f, 1f, 100), FPSLimiterKnownValues.LimitSixty)

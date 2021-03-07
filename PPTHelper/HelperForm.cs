@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Windows.Forms;
 using WinFormAnimation;
@@ -11,6 +14,7 @@ namespace PPTHelper
         private readonly IController controller;
         private bool pinned = false;
         private readonly int commonTop;
+        private Size defaultSize;
         public HelperForm(IController controller)
         {
             this.controller = controller;
@@ -21,6 +25,10 @@ namespace PPTHelper
             Location = new Point((bound.Width - Width) / 2, commonTop);
             StartPosition = FormStartPosition.Manual;
             CheckForIllegalCrossThreadCalls = false;
+            defaultSize = Size;
+
+            pinned = Settings.Default.fix;
+            checkPinBoxImage();
 
             controller.ToolSelectionChanged += Controller_ToolSelectionChanged;
             controller.SlideShowChanged += Controller_SlideShowChanged;
@@ -87,6 +95,8 @@ namespace PPTHelper
             controller.Focus();
         }
 
+        private DateTime lastRightBoxClicked = DateTime.Now;
+        private int countRightBoxClicked = 0;
         private void rightBox_Click(object sender, EventArgs e)
         {
             if (!IsUp())
@@ -94,8 +104,115 @@ namespace PPTHelper
                 SlipUp();
                 return;
             }
-            controller.Next();
-            controller.Focus();
+            if (!skipToolShown)
+            {
+                controller.Next();
+                if ((DateTime.Now - lastRightBoxClicked).TotalMilliseconds <= 700)
+                    countRightBoxClicked++;
+                if (countRightBoxClicked >= 3)
+                {
+                    ShowSkipTool();
+                    countRightBoxClicked = 0;
+                }
+                lastRightBoxClicked = DateTime.Now;
+                controller.Focus();
+            } 
+            else
+            {
+                HideSkipTool();
+                controller.Switch();
+            }
+        }
+
+        private Animator skipToolAminator;
+        private bool skipToolShown = false;
+        private SafeInvoker<float> SetAlpha(PictureBox pictureBox)
+        {
+            var bmpIn = (Bitmap)pictureBox.BackgroundImage.Clone();
+            Bitmap setBitmap(int alpha)
+            {
+                Bitmap bmpOut = new Bitmap(bmpIn.Width, bmpIn.Height);
+                float a = alpha / 255f;
+                Rectangle r = new Rectangle(0, 0, bmpIn.Width, bmpIn.Height);
+
+                float[][] matrixItems = {
+                    new float[] {1, 0, 0, 0, 0},
+                    new float[] {0, 1, 0, 0, 0},
+                    new float[] {0, 0, 1, 0, 0},
+                    new float[] {0, 0, 0, a, 0},
+                    new float[] {0, 0, 0, 0, 1}
+                };
+
+                ColorMatrix colorMatrix = new ColorMatrix(matrixItems);
+
+                ImageAttributes imageAtt = new ImageAttributes();
+                imageAtt.SetColorMatrix(colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
+
+                using (Graphics g = Graphics.FromImage(bmpOut))
+                    g.DrawImage(bmpIn, r, r.X, r.Y, r.Width, r.Height, GraphicsUnit.Pixel, imageAtt);
+
+                return bmpOut;
+            }
+            return new SafeInvoker<float>((v) => pictureBox.BackgroundImage = setBitmap((int)(255 * v)));
+        }
+
+        private System.Timers.Timer skipHideTimer;
+        private void ShowSkipTool()
+        {
+            lock (this)
+            {
+                if (skipToolShown) return;
+                skipToolShown = true;
+                skipToolAminator?.Stop();
+
+                var path = new Path(1f, 0f, 200);
+                skipToolAminator = new Animator(path, FPSLimiterKnownValues.LimitSixty);
+                skipToolAminator.Play(SetAlpha(rightBox), 
+                    new SafeInvoker(() =>
+                    {
+                        rightBox.BackgroundImage = Properties.Resources.skip_next;
+                        path = new Path(0, 1, 200);
+                        skipToolAminator = new Animator(path, FPSLimiterKnownValues.LimitSixty);
+                        skipToolAminator.Play(SetAlpha(rightBox),
+                            new SafeInvoker(() => skipToolAminator = null)
+                        );
+                    }));
+
+                skipHideTimer = new System.Timers.Timer()
+                {
+                    Interval = 1400,
+                    AutoReset = false
+                };
+                skipHideTimer.Elapsed += (e, s) => HideSkipTool();
+                skipHideTimer.Start();
+            }
+            
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        private void HideSkipTool()
+        {
+            lock (this)
+            {
+                skipHideTimer?.Stop();
+                if (!skipToolShown) return;
+                skipToolAminator?.Stop();
+
+                var path = new Path(1, 0, 200);
+
+                skipToolAminator = new Animator(path, FPSLimiterKnownValues.LimitSixty);
+                skipToolAminator.Play(SetAlpha(rightBox),
+                    new SafeInvoker(() =>
+                    {
+                        rightBox.BackgroundImage = Properties.Resources.next;
+                        path = new Path(0, 1, 200);
+                        skipToolAminator = new Animator(path, FPSLimiterKnownValues.LimitSixty);
+                        skipToolAminator.Play(SetAlpha(rightBox),
+                            new SafeInvoker(() => skipToolAminator = null)
+                        );
+                    }));
+                skipToolShown = false;
+            }
         }
 
         private void pictureBox1_Click(object sender, EventArgs e)
@@ -295,14 +412,8 @@ namespace PPTHelper
             ShowPenForm();
         }
 
-        private void pinBox_Click(object sender, EventArgs e)
+        private void checkPinBoxImage()
         {
-            if (!IsUp())
-            {
-                SlipUp();
-                return;
-            }
-            pinned = !pinned;
             if (pinned)
             {
                 pinBox.Image = Properties.Resources.pin_selected;
@@ -313,6 +424,16 @@ namespace PPTHelper
                 pinBox.Image = Properties.Resources.pin;
                 InvalidateContextAwarePosition();
             }
+        }
+        private void pinBox_Click(object sender, EventArgs e)
+        {
+            if (!IsUp())
+            {
+                SlipUp();
+                return;
+            }
+            pinned = !pinned;
+            checkPinBoxImage();
 
             controller.Focus();
         }
