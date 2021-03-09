@@ -55,9 +55,14 @@ namespace PPTHelper
             view.Previous();
         }
 
+        public static ISelection LastSelection;
         public override void Exit()
         {
             view.Exit();
+            if (Settings.Default.keep)
+            {
+                LastSelection = this.ToolSelection;
+            }
         }
 
         public override void Focus()
@@ -142,13 +147,20 @@ namespace PPTHelper
             {
                 helper[Wn.Presentation].Close();
             }
-            var form = new HelperForm(new Controller(Wn));
+            var controller = new Controller(Wn);
+            var form = new HelperForm(controller);
             
             form.Show();
             helper[Wn.Presentation] = form;
 
             new Thread(() =>
             {
+                var last = Controller.LastSelection;
+                if (last != null)
+                {
+                    controller.ToolSelection = last;
+                }
+                // Active the presentation
                 Thread.Sleep(400);
                 Wn.Activate();
             }).Start();

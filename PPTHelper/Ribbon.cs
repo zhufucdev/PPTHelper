@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Office.Core;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -42,6 +43,16 @@ namespace PPTHelper
             }
         }
 
+        public bool KeepPen
+        {
+            get => Settings.Default.keep;
+            set
+            {
+                Settings.Default.keep = value;
+                Settings.Default.Save();
+            }
+        }
+
         public Ribbon()
         {
         }
@@ -63,9 +74,18 @@ namespace PPTHelper
             this.ribbon = ribbonUI;
         }
 
+        public bool GetFixPressed(Office.IRibbonControl control) => FixByDefault;
+
         public void OnFixSwitch(Office.IRibbonControl control, bool isSelected)
         {
             FixByDefault = isSelected;
+        }
+
+        public bool GetPenKeepPressed(Office.IRibbonControl control) => KeepPen;
+
+        public void OnPenKeep(Office.IRibbonControl control, bool isSelected)
+        {
+            KeepPen = isSelected;
         }
 
         #endregion

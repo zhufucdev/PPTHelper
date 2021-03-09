@@ -34,5 +34,17 @@ namespace PPTHelper {
                 this["fix"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool keep {
+            get {
+                return ((bool)(this["keep"]));
+            }
+            set {
+                this["keep"] = value;
+            }
+        }
     }
 }

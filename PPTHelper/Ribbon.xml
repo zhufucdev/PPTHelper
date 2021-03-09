@@ -4,9 +4,11 @@
     <tabs>
       <tab idMso="TabSlideShow">
         <group id="helpergroup"
-               label="PPTHelper">
-          <checkBox id="fixByDefault" label="固定控件" screentip="默认情况下固定控件"
-                    onAction="OnFixSwitch"/>
+               label="PPTHelper设置">
+          <checkBox id="fixByDefault" label="固定控件" screentip="默认情况下固定控件。"
+                    onAction="OnFixSwitch" getPressed="GetFixPressed"/>
+          <checkBox id="keepPen" label="保持设置" screentip="在结束放映前保存临时设置以便下次放映。"
+                    onAction="OnPenKeep" getPressed="GetPenKeepPressed"/>
         </group>
       </tab>
     </tabs>

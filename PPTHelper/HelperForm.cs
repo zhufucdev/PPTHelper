@@ -222,6 +222,7 @@ namespace PPTHelper
                 SlipUp();
                 return;
             }
+
             controller.Exit();
         }
 
