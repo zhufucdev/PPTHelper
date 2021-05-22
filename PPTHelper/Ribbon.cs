@@ -86,6 +86,8 @@ namespace PPTHelper
         public void OnPenKeep(Office.IRibbonControl control, bool isSelected)
         {
             KeepPen = isSelected;
+            if (!isSelected)
+                Controller.LastSelection = null;
         }
 
         #endregion
