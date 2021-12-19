@@ -33,6 +33,12 @@ namespace PPTHelper
             controller.ToolSelectionChanged += Controller_ToolSelectionChanged;
             controller.SlideShowChanged += Controller_SlideShowChanged;
 
+            foreach (Control ctr in Controls)
+            {
+                GestureUtils.AddSlideDownGesture(ctr);
+            }
+            GestureUtils.AddSlideDownGesture(this);
+
             controller.Focus();
         }
 
@@ -86,6 +92,11 @@ namespace PPTHelper
 
         private void leftBox_Click(object sender, EventArgs e)
         {
+            if (GestureUtils.IsInvolved(sender as Control))
+            {
+                GestureUtils.Reject(sender as Control);
+                return;
+            }
             if (!IsUp())
             {
                 SlipUp();
@@ -99,6 +110,11 @@ namespace PPTHelper
         private int countRightBoxClicked = 0;
         private void rightBox_Click(object sender, EventArgs e)
         {
+            if (GestureUtils.IsInvolved(sender as Control))
+            {
+                GestureUtils.Reject(sender as Control);
+                return;
+            }
             if (!IsUp())
             {
                 SlipUp();
@@ -217,12 +233,16 @@ namespace PPTHelper
 
         private void pictureBox1_Click(object sender, EventArgs e)
         {
+            if (GestureUtils.IsInvolved(sender as Control))
+            {
+                GestureUtils.Reject(sender as Control);
+                return;
+            }
             if (!IsUp())
             {
                 SlipUp();
                 return;
             }
-
             controller.Exit();
         }
 
@@ -257,17 +277,24 @@ namespace PPTHelper
             }
             else
             {
-                SlipUp();
+                if (!GestureUtils.IsGesturing)
+                {
+                    SlipUp();
+                }
+                else
+                {
+                    GestureUtils.IsGesturing = false;
+                }   
             }
         }
         private Animator presentAnimator;
         private bool isHintShown = false;
         private HintForm hintForm;
-        private bool IsUp()
+        public bool IsUp()
         {
             return Top == commonTop;
         }
-        private void SlipDown()
+        public void SlipDown(bool showHint = true)
         {
             if (!IsUp()) return;
             var path = new Path(Top, (int)(commonTop + Height * 0.8), 500);
@@ -280,7 +307,7 @@ namespace PPTHelper
             presentAnimator = new Animator(path, FPSLimiterKnownValues.LimitSixty);
             presentAnimator.Play(new SafeInvoker<float>((v) => Top = (int)v));
 
-            if (!isHintShown)
+            if (!isHintShown && showHint)
             {
                 isHintShown = true;
                 hintForm = new HintForm(new Point(Location.X, (int)path.End), controller);
@@ -294,7 +321,7 @@ namespace PPTHelper
             }
         }
 
-        private void Blink()
+        public void Blink()
         {
             var timer = new System.Timers.Timer()
             {
@@ -319,7 +346,7 @@ namespace PPTHelper
             timer.Start();
         }
 
-        private void SlipUp()
+        public void SlipUp()
         {
             if (IsUp()) return;
             var path = new Path(Top, commonTop, 300);
@@ -365,6 +392,11 @@ namespace PPTHelper
 
         private void penBox_Click(object sender, EventArgs e)
         {
+            if (GestureUtils.IsInvolved(sender as Control))
+            {
+                GestureUtils.Reject(sender as Control);
+                return;
+            }
             if (!IsUp())
             {
                 SlipUp();
@@ -383,6 +415,11 @@ namespace PPTHelper
 
         private void cursorBox_Click(object sender, EventArgs e)
         {
+            if (GestureUtils.IsInvolved(sender as Control))
+            {
+                GestureUtils.Reject(sender as Control);
+                return;
+            }
             if (!IsUp())
             {
                 SlipUp();
@@ -394,6 +431,11 @@ namespace PPTHelper
 
         private void eraserBox_Click(object sender, EventArgs e)
         {
+            if (GestureUtils.IsInvolved(sender as Control))
+            {
+                GestureUtils.Reject(sender as Control);
+                return;
+            }
             if (!IsUp())
             {
                 SlipUp();
@@ -405,6 +447,11 @@ namespace PPTHelper
 
         private void penOptionBox_Click(object sender, EventArgs e)
         {
+            if (GestureUtils.IsInvolved(sender as Control))
+            {
+                GestureUtils.Reject(sender as Control);
+                return;
+            }
             if (!IsUp())
             {
                 SlipUp();
@@ -428,6 +475,11 @@ namespace PPTHelper
         }
         private void pinBox_Click(object sender, EventArgs e)
         {
+            if (GestureUtils.IsInvolved(sender as Control))
+            {
+                GestureUtils.Reject(sender as Control);
+                return;
+            }
             if (!IsUp())
             {
                 SlipUp();
@@ -441,6 +493,10 @@ namespace PPTHelper
 
         private void HelperForm_MouseEnter(object sender, EventArgs e)
         {
+            if (presentAnimator?.CurrentStatus == AnimatorStatus.Playing || IsUp())
+            {
+                return;
+            }
             SlipUp();
         }
 

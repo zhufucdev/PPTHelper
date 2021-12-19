@@ -14,9 +14,9 @@ namespace PPTHelper
     {
         private readonly Size SlideShowMargin;
 
-        private readonly PowerPoint.SlideShowView view;
-        private readonly PowerPoint.SlideShowWindow window;
-        public Controller(PowerPoint.SlideShowWindow window)
+        private readonly SlideShowView view;
+        private readonly SlideShowWindow window;
+        public Controller(SlideShowWindow window)
         {
             view = window.View;
             this.window = window;
@@ -134,24 +134,24 @@ namespace PPTHelper
     }
     public partial class ThisAddIn
     {
-        private Dictionary<PowerPoint.Presentation, HelperForm> helper = new Dictionary<PowerPoint.Presentation, HelperForm>();
+        public Dictionary<Presentation, HelperForm> Helper = new Dictionary<Presentation, HelperForm>();
 
-        private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
+        private void ThisAddIn_Shutdown(object sender, EventArgs e)
         {
         }
         
-        private void Application_SlideShowBegin(PowerPoint.SlideShowWindow Wn)
+        private void Application_SlideShowBegin(SlideShowWindow Wn)
         {
             if (Wn.IsFullScreen == MsoTriState.msoFalse) return;
-            if (helper.ContainsKey(Wn.Presentation))
+            if (Helper.ContainsKey(Wn.Presentation))
             {
-                helper[Wn.Presentation].Close();
+                Helper[Wn.Presentation].Close();
             }
             var controller = new Controller(Wn);
             var form = new HelperForm(controller);
             
             form.Show();
-            helper[Wn.Presentation] = form;
+            Helper[Wn.Presentation] = form;
 
             new Thread(() =>
             {
@@ -166,10 +166,10 @@ namespace PPTHelper
             }).Start();
         }
 
-        private void Application_SlideShowEnd(PowerPoint.Presentation Pres)
+        private void Application_SlideShowEnd(Presentation Pres)
         {
-            if (!helper.ContainsKey(Pres)) return;
-            helper[Pres].Close();
+            if (!Helper.ContainsKey(Pres)) return;
+            Helper[Pres].Close();
         }
 
         protected override IRibbonExtensibility CreateRibbonExtensibilityObject()

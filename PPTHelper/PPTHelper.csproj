@@ -33,7 +33,7 @@
     <PublishUrl>F:\PPTHelper\</PublishUrl>
     <InstallUrl />
     <TargetCulture>zh-chs</TargetCulture>
-    <ApplicationVersion>1.0.0.18</ApplicationVersion>
+    <ApplicationVersion>1.0.0.19</ApplicationVersion>
     <AutoIncrementApplicationRevision>true</AutoIncrementApplicationRevision>
     <UpdateEnabled>true</UpdateEnabled>
     <UpdateInterval>7</UpdateInterval>
@@ -188,6 +188,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="ControllerInterface.cs" />
+    <Compile Include="GestureUtils.cs" />
     <Compile Include="HelperForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -307,7 +308,7 @@
     <ManifestKeyFile>PPTHelper_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>EE9023A2BF367109E401EDF5A7E44C586EA31779</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>60A9AD00A259DD9411D3EBD826CF0A0FF7708431</ManifestCertificateThumbprint>
   </PropertyGroup>
   <!-- Include the build rules for a C# project. -->
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
